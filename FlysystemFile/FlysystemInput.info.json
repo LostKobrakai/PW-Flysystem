@@ -1,0 +1,12 @@
+{
+    "title": "Flysystem FileInputfield",
+    "version": "0.0.1",
+    "summary": "InputfieldFile using league\/flysystem",
+    "author": "Benjamin Milde",
+    "requires": [
+        "PHP>=5.4.0",
+        "ProcessWire>=2.8.8",
+        "InputfieldFile",
+        "FieldtypeFileFlysystem"
+    ]
+}

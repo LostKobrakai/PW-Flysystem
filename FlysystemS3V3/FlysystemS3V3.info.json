@@ -1,0 +1,12 @@
+{
+    "title": "FileFlysystem - S3 Adapter (V3)",
+    "version": "0.0.1",
+    "summary": "Add the S3 adapter (V3) into FlysystemFile",
+    "author": "Benjamin Milde",
+    "requires": [
+        "PHP>=5.4.0",
+        "ProcessWire>=2.8.8",
+        "FlysystemFile"
+    ],
+    "autoload": true
+}

@@ -1,0 +1,109 @@
+<?php namespace ProcessWire;
+/**
+ * Flysystem FileField (0.0.1)
+ * FieldtypeFile using league/flysystem
+ * 
+ * @author Benjamin Milde
+ * 
+ * ProcessWire 2.x
+ * Copyright (C) 2011 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ * 
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ * 
+ */
+use Aws\S3\S3Client;
+use League\Flysystem\AwsS3v3\AwsS3Adapter;
+
+class FlysystemS3V3 extends FlysystemAbstract {
+
+	/**
+	 * @return string Unique key for the adapter
+	 */
+	protected function key() { return 's3v3'; }
+
+	/**
+	 * @return string Label for the adapter
+	 */
+	protected function label() { return 'S3 Adapter (V3)'; }
+
+	/**
+	 * @param InputfieldFieldset $fieldset
+	 * @param Field $field
+	 * @return void
+	 */
+	protected function getConfigFields(InputfieldFieldset $fieldset, Field $field){
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 's3v3_path'); 
+		$f->label = $this->_('Path');
+		$f->value = $field->s3v3_path;
+		$f->columnWidth = 35;
+		$fieldset->add($f);
+
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 's3v3_bucket'); 
+		$f->label = $this->_('Bucket');
+		$f->value = $field->s3v3_bucket;
+		$f->columnWidth = 35;
+		$fieldset->add($f);
+
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 's3v3_region'); 
+		$f->label = $this->_('Region');
+		$f->value = $field->s3v3_region;
+		$f->columnWidth = 30;
+		$fieldset->add($f);
+
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 's3v3_key'); 
+		$f->label = $this->_('Key');
+		$f->value = $field->s3v3_key;
+		$f->columnWidth = 35;
+		$fieldset->add($f);
+
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 's3v3_secret'); 
+		$f->label = $this->_('Secret');
+		$f->value = $field->s3v3_secret;
+		$f->columnWidth = 35;
+		$fieldset->add($f);
+
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 's3v3_version'); 
+		$f->label = $this->_('Version');
+		$f->value = $field->s3v3_version ?: 'latest';
+		$f->columnWidth = 30;
+		$fieldset->add($f);
+	}
+
+	/**
+	 * @param Field $field
+	 * @return \League\Flysystem\AdapterInterface
+	 */
+	public function constructAdapter(Field $field){
+		$client = new S3Client([
+			'credentials' => [
+				'key'    => $field->s3v3_key,
+				'secret' => $field->s3v3_secret
+			],
+			'region' => $field->s3v3_region,
+			'version' => $field->s3v3_version ?: 'latest',
+		]);
+
+		return new AwsS3Adapter($client, $field->s3v3_bucket, $field->s3v3_path);
+	}
+
+	/**
+	 * @param Field $field
+	 * @return callable Callback which does receive a file path and should return an url
+	 */
+	public function urlCallback(Field $field) {
+		return function($path) use($field) {
+			$adapter = $field->flysystem->getFilesystem($this->key())->getAdapter();
+			$bucket = $adapter->getBucket();
+			return $adapter->getClient()->getObjectUrl($bucket, $path);
+		};
+	}
+
+}

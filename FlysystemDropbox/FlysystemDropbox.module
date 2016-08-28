@@ -1,0 +1,67 @@
+<?php namespace ProcessWire;
+/**
+ * Flysystem FileField (0.0.1)
+ * FieldtypeFile using league/flysystem
+ * 
+ * @author Benjamin Milde
+ * 
+ * ProcessWire 2.x
+ * Copyright (C) 2011 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ * 
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ * 
+ */
+use League\Flysystem\Dropbox\DropboxAdapter;
+use Dropbox\Client;
+
+class FlysystemDropbox extends FlysystemAbstract {
+
+	/**
+	 * @return string Unique key for the adapter
+	 */
+	protected function key() { return 'dropbox'; }
+
+	/**
+	 * @return string Label for the adapter
+	 */
+	protected function label() { return 'Dropbox Adapter'; }
+
+	/**
+	 * @param InputfieldFieldset $fieldset
+	 * @param Field $field
+	 * @return void
+	 */
+	protected function getConfigFields(InputfieldFieldset $fieldset, Field $field){
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 'dropbox_path'); 
+		$f->label = $this->_('Path');
+		$f->value = $field->dropbox_path;
+		$fieldset->add($f);
+
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 'dropbox_token'); 
+		$f->label = $this->_('API Token');
+		$f->value = $field->dropbox_token;
+		$f->columnWidth = 70;
+		$fieldset->add($f);
+
+		$f = $this->modules->get('InputfieldText'); 
+		$f->attr('name', 'dropbox_secret'); 
+		$f->label = $this->_('API Secret');
+		$f->value = $field->dropbox_secret;
+		$f->columnWidth = 30;
+		$fieldset->add($f);
+	}
+
+	/**
+	 * @param Field $field
+	 * @return \League\Flysystem\AdapterInterface
+	 */
+	public function constructAdapter(Field $field){
+		$client = new Client($field->dropbox_token, $field->dropbox_secret);
+		return new DropboxAdapter($client, $field->dropbox_path);
+	}
+
+}
